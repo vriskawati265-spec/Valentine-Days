@@ -67,9 +67,8 @@ const TypewriterStep = ({ onFlowComplete }: { onFlowComplete: () => void }) => {
     const [isDone, setIsDone] = useState(false);
 
     const audioRef = React.useRef<HTMLAudioElement | null>(null);
-    const hasStarted = React.useRef(false);
 
-    // TYPEWRITER
+    // ✅ FIX UTAMA (hilangin hasStarted + dependency error)
     useEffect(() => {
         if (displayedText.length < text.length) {
             const timer = setTimeout(() => {
@@ -78,22 +77,19 @@ const TypewriterStep = ({ onFlowComplete }: { onFlowComplete: () => void }) => {
             return () => clearTimeout(timer);
         }
 
-        if (!hasStarted.current) {
-            hasStarted.current = true;
+        const timer = setTimeout(() => {
+            setShowImages(true);
 
-            const timer = setTimeout(() => {
-                setShowImages(true);
+            audioRef.current?.play().catch(() => {
+                console.log("autoplay diblok");
+            });
+        }, 600);
 
-                audioRef.current?.play().catch(() => {
-                    console.log("autoplay diblok");
-                });
-            }, 600);
+        return () => clearTimeout(timer);
 
-            return () => clearTimeout(timer);
-        }
-    }, [displayedText, text]);
+    }, [displayedText]); // ❗ FIX: hapus "text"
 
-    // SLIDE IMAGE
+    // slideshow
     useEffect(() => {
         if (!showImages) return;
 
@@ -107,7 +103,7 @@ const TypewriterStep = ({ onFlowComplete }: { onFlowComplete: () => void }) => {
         return () => clearInterval(interval);
     }, [showImages, images.length]);
 
-    // FINISH
+    // selesai
     useEffect(() => {
         if (index === images.length - 1 && !isDone) {
             const timer = setTimeout(() => {
@@ -134,7 +130,7 @@ const TypewriterStep = ({ onFlowComplete }: { onFlowComplete: () => void }) => {
                 {showImages && (
                     <motion.img
                         key={index}
-                        src={encodeURI(images[index])}
+                        src={images[index]} // ❗ FIX: hapus encodeURI
                         className="absolute inset-0 w-full h-full object-cover"
                         initial={{ opacity: 0, scale: 1.2 }}
                         animate={{ opacity: 1, scale: 1 }}
