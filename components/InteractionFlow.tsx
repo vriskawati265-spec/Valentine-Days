@@ -1,124 +1,162 @@
-'use client';
-
-import React, { useState, useEffect, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Heart, X, Circle } from 'lucide-react';
-
-// --- Background Particles ---
-const BackgroundHearts = () => {
-    const [mounted, setMounted] = useState(false);
-    useEffect(() => setMounted(true), []);
-
-    if (!mounted) return null;
-
-    return (
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            {[...Array(10)].map((_, i) => (
-                <motion.div
-                    key={i}
-                    initial={{
-                        opacity: 0,
-                        y: '110vh',
-                        x: `${(i * 10) + Math.random() * 5}%`,
-                        scale: 0.5
-                    }}
-                    animate={{
-                        opacity: [0, 0.2, 0],
-                        y: '-10vh',
-                        rotate: [0, 180],
-                        scale: [0.5, 0.8, 0.5]
-                    }}
-                    transition={{
-                        duration: 15 + Math.random() * 10,
-                        repeat: Infinity,
-                        delay: i * 2,
-                        ease: "linear"
-                    }}
-                    className="absolute text-red-500/10"
-                >
-                    <Heart size={30} fill="currentColor" />
-                </motion.div>
-            ))}
-        </div>
-    );
-};
-
-// --- Step 1 ---
-const LoveModeStep = ({ onComplete }: { onComplete: () => void }) => {
-    const [isOn, setIsOn] = useState(false);
-
-    useEffect(() => {
-        if (isOn) {
-            const timer = setTimeout(() => onComplete(), 3000);
-            return () => clearTimeout(timer);
-        }
-    }, [isOn, onComplete]);
-
-    return (
-        <motion.div className="flex flex-col items-center justify-center relative z-10">
-            <div className="p-8 rounded-3xl bg-white/5 backdrop-blur-xl flex flex-col items-center space-y-6">
-                <Heart className={`w-20 h-20 ${isOn ? 'text-red-500 fill-red-500' : 'text-white/20'}`} />
-
-                <span className="text-3xl text-white">Love mode</span>
-
-                <button
-                    onClick={() => setIsOn(!isOn)}
-                    className="w-24 h-12 bg-red-500 rounded-full"
-                />
-            </div>
-        </motion.div>
-    );
-};
-
-// --- Step 4 ---
 const TypewriterStep = ({ onComplete }: { onComplete: () => void }) => {
-    const text = "Happy Birthday Badasplenger"; // ✅ SUDAH DIGANTI
-    const [displayedText, setDisplayedText] = useState("");
+    const text = "happy birthday badasplenger";
 
+    const images = [
+        "/IMG-20251202-WA0015(1).jpg",
+        "/IMG-20251222-WA0048(1).jpg",
+        "/IMG-20251225-WA0054(1).jpg",
+        "/IMG-20251229-WA0033.jpg",
+        "/IMG-20260101-WA0023(1).jpg",
+        "/IMG-20260101-WA0024(1).jpg",
+        "/IMG-20260101-WA0025(1).jpg",
+        "/IMG-20260102-WA0013.jpg",
+        "/IMG-20260102-WA0014.jpg",
+        "/IMG-20260113-WA0103(1).jpg",
+        "/IMG-20260118-WA0169(1).jpg",
+        "/IMG-20260123-WA0008(1).jpg",
+        "/IMG-20260123-WA0009(1).jpg",
+        "/IMG-20260123-WA0013(2).jpg",
+
+        "/IMG-20260202-WA0004.jpg",
+        "/IMG-20260202-WA0005.jpg",
+        "/IMG-20260202-WA0006.jpg",
+        "/IMG-20260202-WA0008.jpg",
+        "/IMG-20260202-WA0009.jpg",
+        "/IMG-20260202-WA0010.jpg",
+        "/IMG-20260202-WA0012.jpg",
+        "/IMG-20260202-WA0013.jpg",
+        "/IMG-20260202-WA0015.jpg",
+        "/IMG-20260202-WA0017.jpg",
+        "/IMG-20260202-WA0018.jpg",
+        "/IMG-20260202-WA0020.jpg",
+        "/IMG-20260202-WA0023.jpg",
+        "/IMG-20260202-WA0024.jpg",
+        "/IMG-20260202-WA0025.jpg",
+        "/IMG-20260202-WA0026.jpg",
+        "/IMG-20260202-WA0027.jpg",
+        "/IMG-20260202-WA0028.jpg",
+        "/IMG-20260202-WA0029.jpg",
+        "/IMG-20260202-WA0031.jpg",
+
+        "/IMG-20260210-WA0001(2).jpg",
+        "/IMG-20260211-WA0007(2).jpg",
+        "/IMG-20260220-WA0020(1).jpg",
+
+        "/IMG-20260303-WA0007(3).jpg",
+        "/IMG-20260303-WA0007(4).jpg",
+        "/IMG-20260303-WA0009(2).jpg",
+        "/IMG-20260303-WA0009(3).jpg",
+
+        "/IMG-20260321-WA0001(1).jpg",
+        "/IMG-20260321-WA0002(2).jpg",
+        "/IMG-20260321-WA0002(3).jpg",
+        "/IMG-20260321-WA0003(1).jpg",
+
+        "/IMG-20260401-WA0006(1).jpg",
+
+        "/IMG-20260502-WA0016(1).jpg",
+        "/IMG-20260502-WA0019.jpg",
+        "/IMG-20260502-WA0020(1).jpg",
+        "/IMG-20260502-WA0021.jpg",
+        "/IMG-20260502-WA0022.jpg",
+        "/IMG-20260502-WA0024.jpg",
+    ];
+
+    const [displayedText, setDisplayedText] = useState("");
+    const [showImages, setShowImages] = useState(false);
+    const [index, setIndex] = useState(0);
+    const [isDone, setIsDone] = useState(false);
+
+    const audioRef = React.useRef<HTMLAudioElement | null>(null);
+    const hasStarted = React.useRef(false);
+
+    // typing + start
     useEffect(() => {
         if (displayedText.length < text.length) {
             const timer = setTimeout(() => {
                 setDisplayedText(text.slice(0, displayedText.length + 1));
-            }, 120);
+            }, 80);
             return () => clearTimeout(timer);
-        } else {
+        }
+
+        if (!hasStarted.current) {
+            hasStarted.current = true;
+
+            const timer = setTimeout(() => {
+                setShowImages(true);
+
+                if (audioRef.current) {
+                    audioRef.current.muted = false;
+                    audioRef.current.play().catch(() => {});
+                }
+            }, 600);
+
+            return () => clearTimeout(timer);
+        }
+    }, [displayedText, text]);
+
+    // slideshow (FIX stop interval)
+    useEffect(() => {
+        if (!showImages) return;
+
+        const interval = setInterval(() => {
+            setIndex((prev) => {
+                if (prev < images.length - 1) return prev + 1;
+                clearInterval(interval); // 🔥 stop di akhir
+                return prev;
+            });
+        }, 1500); // 🔥 lebih smooth
+
+        return () => clearInterval(interval);
+    }, [showImages, images.length]);
+
+    // selesai
+    useEffect(() => {
+        if (index === images.length - 1 && !isDone) {
+            setIsDone(true);
             setTimeout(onComplete, 2000);
         }
-    }, [displayedText, text, onComplete]);
+    }, [index, images.length, onComplete, isDone]);
 
     return (
-        <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="flex items-center justify-center min-h-screen p-4 relative z-10"
-        >
-            <h1 className="text-3xl sm:text-6xl md:text-8xl font-playfair text-white text-center leading-tight px-4">
-                {displayedText}
-            </h1>
-        </motion.div>
-    );
-};
+        <div className="fixed inset-0 bg-black overflow-hidden">
 
-// --- MAIN ---
-export default function InteractionFlow({ onFlowComplete }: { onFlowComplete: () => void }) {
-    const [step, setStep] = useState(1);
+            {/* AUDIO */}
+            <audio ref={audioRef} src="/tumblrgirl.mp3" loop muted />
 
-    return (
-        <div className="fixed inset-0 z-50 bg-[#060010] flex items-center justify-center overflow-hidden">
+            {/* TEXT */}
+            <div className="absolute top-12 w-full text-center z-20">
+                <h1 className="text-xl sm:text-3xl md:text-5xl text-white font-semibold tracking-wide px-4">
+                    {displayedText}
+                </h1>
+            </div>
 
-            <BackgroundHearts />
-
+            {/* SLIDESHOW */}
             <AnimatePresence mode="wait">
-                {step === 1 && (
-                    <LoveModeStep onComplete={() => setStep(2)} />
-                )}
-                {step === 2 && (
-                    <TypewriterStep onComplete={() => onFlowComplete()} />
+                {showImages && (
+                    <motion.img
+                        key={index}
+                        src={images[index]}
+                        className="absolute inset-0 w-full h-full object-cover"
+                        initial={{ opacity: 0, scale: 1.15 }}
+                        animate={{
+                            opacity: 1,
+                            scale: 1,
+                        }}
+                        exit={{
+                            opacity: 0,
+                            scale: 1.05,
+                        }}
+                        transition={{
+                            duration: 1.2, // 🔥 lebih halus
+                            ease: "easeInOut"
+                        }}
+                    />
                 )}
             </AnimatePresence>
 
-            <div className="absolute -top-20 -left-20 w-72 h-72 bg-red-900/20 blur-[60px] rounded-full" />
-            <div className="absolute -bottom-20 -right-20 w-72 h-72 bg-pink-900/20 blur-[60px] rounded-full" />
+            {/* overlay */}
+            <div className="absolute inset-0 bg-black/40 z-10" />
         </div>
     );
-}
+};
