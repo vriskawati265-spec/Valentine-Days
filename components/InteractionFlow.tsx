@@ -1,9 +1,13 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
-const TypewriterStep = ({ onComplete }: { onComplete: () => void }) => {
+type Props = {
+    onComplete: () => void;
+};
+
+const TypewriterStep = ({ onComplete }: Props) => {
     const text = "happy birthday badasplenger";
 
     const images = [
@@ -66,9 +70,10 @@ const TypewriterStep = ({ onComplete }: { onComplete: () => void }) => {
     const [index, setIndex] = useState(0);
     const [isDone, setIsDone] = useState(false);
 
-    const audioRef = React.useRef<HTMLAudioElement | null>(null);
-    const hasStarted = React.useRef(false);
+    const audioRef = useRef<HTMLAudioElement>(null);
+    const hasStarted = useRef(false);
 
+    // typing
     useEffect(() => {
         if (displayedText.length < text.length) {
             const timer = setTimeout(() => {
@@ -83,16 +88,18 @@ const TypewriterStep = ({ onComplete }: { onComplete: () => void }) => {
             const timer = setTimeout(() => {
                 setShowImages(true);
 
-                audioRef.current?.play().catch(() => {
-                    console.log("autoplay diblok");
-                });
-
+                if (audioRef.current) {
+                    audioRef.current.play().catch(() => {
+                        console.log("autoplay diblok");
+                    });
+                }
             }, 600);
 
             return () => clearTimeout(timer);
         }
     }, [displayedText, text]);
 
+    // slideshow
     useEffect(() => {
         if (!showImages) return;
 
@@ -106,12 +113,15 @@ const TypewriterStep = ({ onComplete }: { onComplete: () => void }) => {
         return () => clearInterval(interval);
     }, [showImages, images.length]);
 
+    // selesai
     useEffect(() => {
         if (index === images.length - 1 && !isDone) {
             setIsDone(true);
-            setTimeout(onComplete, 2000);
+            setTimeout(() => {
+                onComplete();
+            }, 2000);
         }
-    }, [index, images.length, onComplete, isDone]);
+    }, [index, images.length, isDone, onComplete]);
 
     return (
         <div className="fixed inset-0 bg-black overflow-hidden">
@@ -133,7 +143,7 @@ const TypewriterStep = ({ onComplete }: { onComplete: () => void }) => {
                         initial={{ opacity: 0, scale: 1.2 }}
                         animate={{ opacity: 1, scale: 1 }}
                         exit={{ opacity: 0, scale: 1.05 }}
-                        transition={{ duration: 1.4 }}
+                        transition={{ duration: 1.4, ease: "easeInOut" }}
                     />
                 )}
             </AnimatePresence>
