@@ -6,13 +6,12 @@ import { motion, AnimatePresence } from "framer-motion";
 const TypewriterStep = ({ onFlowComplete }: { onFlowComplete: () => void }) => {
     const text = "happy birthday badasplenger";
 
-    // ✅ FIX: pakai 1.jpg - 50.jpg
-    const images = Array.from({ length: 50 }, (_, i) => `/${i + 1}.jpg`);
+    // ✅ FIX: cuma 1 - 9 + pakai .jpeg
+    const images = Array.from({ length: 9 }, (_, i) => `/${i + 1}.jpeg`);
 
     const [displayedText, setDisplayedText] = useState("");
     const [showImages, setShowImages] = useState(false);
     const [index, setIndex] = useState(0);
-    const [isDone, setIsDone] = useState(false);
 
     const audioRef = React.useRef<HTMLAudioElement | null>(null);
 
@@ -36,31 +35,16 @@ const TypewriterStep = ({ onFlowComplete }: { onFlowComplete: () => void }) => {
         return () => clearTimeout(timer);
     }, [displayedText]);
 
-    // SLIDESHOW
+    // SLIDESHOW (LOOP TERUS)
     useEffect(() => {
         if (!showImages) return;
 
         const interval = setInterval(() => {
-            setIndex((prev) => {
-                if (prev < images.length - 1) return prev + 1;
-                return prev;
-            });
+            setIndex((prev) => (prev + 1) % images.length);
         }, 1300);
 
         return () => clearInterval(interval);
     }, [showImages, images.length]);
-
-    // FINISH
-    useEffect(() => {
-        if (index === images.length - 1 && !isDone) {
-            const timer = setTimeout(() => {
-                setIsDone(true);
-                onFlowComplete();
-            }, 2000);
-
-            return () => clearTimeout(timer);
-        }
-    }, [index, images.length, isDone, onFlowComplete]);
 
     return (
         <div className="fixed inset-0 bg-black overflow-hidden">
@@ -77,7 +61,7 @@ const TypewriterStep = ({ onFlowComplete }: { onFlowComplete: () => void }) => {
                 {showImages && (
                     <motion.img
                         key={index}
-                        src={images[index]} // ✅ bersih, tanpa encodeURI
+                        src={images[index]}
                         className="absolute inset-0 w-full h-full object-cover"
                         initial={{ opacity: 0, scale: 1.2 }}
                         animate={{ opacity: 1, scale: 1 }}
