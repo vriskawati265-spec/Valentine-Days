@@ -16,7 +16,6 @@ const TypewriterStep = ({ onComplete }: { onComplete: () => void }) => {
         "/IMG-20260123-WA0008(1).jpg",
         "/IMG-20260123-WA0009(1).jpg",
         "/IMG-20260123-WA0013(2).jpg",
-
         "/IMG-20260202-WA0004.jpg",
         "/IMG-20260202-WA0005.jpg",
         "/IMG-20260202-WA0006.jpg",
@@ -37,23 +36,18 @@ const TypewriterStep = ({ onComplete }: { onComplete: () => void }) => {
         "/IMG-20260202-WA0028.jpg",
         "/IMG-20260202-WA0029.jpg",
         "/IMG-20260202-WA0031.jpg",
-
         "/IMG-20260210-WA0001(2).jpg",
         "/IMG-20260211-WA0007(2).jpg",
         "/IMG-20260220-WA0020(1).jpg",
-
         "/IMG-20260303-WA0007(3).jpg",
         "/IMG-20260303-WA0007(4).jpg",
         "/IMG-20260303-WA0009(2).jpg",
         "/IMG-20260303-WA0009(3).jpg",
-
         "/IMG-20260321-WA0001(1).jpg",
         "/IMG-20260321-WA0002(2).jpg",
         "/IMG-20260321-WA0002(3).jpg",
         "/IMG-20260321-WA0003(1).jpg",
-
         "/IMG-20260401-WA0006(1).jpg",
-
         "/IMG-20260502-WA0016(1).jpg",
         "/IMG-20260502-WA0019.jpg",
         "/IMG-20260502-WA0020(1).jpg",
@@ -70,7 +64,6 @@ const TypewriterStep = ({ onComplete }: { onComplete: () => void }) => {
     const audioRef = React.useRef<HTMLAudioElement | null>(null);
     const hasStarted = React.useRef(false);
 
-    // typing + start
     useEffect(() => {
         if (displayedText.length < text.length) {
             const timer = setTimeout(() => {
@@ -84,33 +77,26 @@ const TypewriterStep = ({ onComplete }: { onComplete: () => void }) => {
 
             const timer = setTimeout(() => {
                 setShowImages(true);
-
-                if (audioRef.current) {
-                    audioRef.current.muted = false;
-                    audioRef.current.play().catch(() => {});
-                }
+                audioRef.current?.play().catch(() => {});
             }, 600);
 
             return () => clearTimeout(timer);
         }
     }, [displayedText, text]);
 
-    // slideshow (FIX stop interval)
     useEffect(() => {
         if (!showImages) return;
 
         const interval = setInterval(() => {
             setIndex((prev) => {
                 if (prev < images.length - 1) return prev + 1;
-                clearInterval(interval); // 🔥 stop di akhir
                 return prev;
             });
-        }, 1500); // 🔥 lebih smooth
+        }, 1300);
 
         return () => clearInterval(interval);
     }, [showImages, images.length]);
 
-    // selesai
     useEffect(() => {
         if (index === images.length - 1 && !isDone) {
             setIsDone(true);
@@ -121,41 +107,41 @@ const TypewriterStep = ({ onComplete }: { onComplete: () => void }) => {
     return (
         <div className="fixed inset-0 bg-black overflow-hidden">
 
-            {/* AUDIO */}
-            <audio ref={audioRef} src="/tumblrgirl.mp3" loop muted />
+            <audio ref={audioRef} src="/tumblrgirl.mp3" loop />
 
-            {/* TEXT */}
             <div className="absolute top-12 w-full text-center z-20">
                 <h1 className="text-xl sm:text-3xl md:text-5xl text-white font-semibold tracking-wide px-4">
                     {displayedText}
                 </h1>
             </div>
 
-            {/* SLIDESHOW */}
             <AnimatePresence mode="wait">
                 {showImages && (
                     <motion.img
                         key={index}
-                        src={images[index]}
+                        src={encodeURI(images[index])} // ✅ FIX DI SINI
                         className="absolute inset-0 w-full h-full object-cover"
-                        initial={{ opacity: 0, scale: 1.15 }}
+                        initial={{ opacity: 0, scale: 1.2 }}
                         animate={{
                             opacity: 1,
                             scale: 1,
+                            x: [0, -10, 10, 0],
                         }}
                         exit={{
                             opacity: 0,
                             scale: 1.05,
                         }}
                         transition={{
-                            duration: 1.2, // 🔥 lebih halus
+                            duration: 1.4,
                             ease: "easeInOut"
+                        }}
+                        onError={(e) => {
+                            (e.target as HTMLImageElement).src = "/fallback.jpg";
                         }}
                     />
                 )}
             </AnimatePresence>
 
-            {/* overlay */}
             <div className="absolute inset-0 bg-black/40 z-10" />
         </div>
     );
