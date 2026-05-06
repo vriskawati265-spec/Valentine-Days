@@ -6,60 +6,8 @@ import { motion, AnimatePresence } from "framer-motion";
 const TypewriterStep = ({ onFlowComplete }: { onFlowComplete: () => void }) => {
     const text = "happy birthday badasplenger";
 
-    const images = [
-        "/IMG-20251202-WA0015(1).jpg",
-        "/IMG-20251222-WA0048(1).jpg",
-        "/IMG-20251225-WA0054(1).jpg",
-        "/IMG-20251229-WA0033.jpg",
-        "/IMG-20260101-WA0023(1).jpg",
-        "/IMG-20260101-WA0024(1).jpg",
-        "/IMG-20260101-WA0025(1).jpg",
-        "/IMG-20260102-WA0013.jpg",
-        "/IMG-20260102-WA0014.jpg",
-        "/IMG-20260113-WA0103(1).jpg",
-        "/IMG-20260118-WA0169(1).jpg",
-        "/IMG-20260123-WA0008(1).jpg",
-        "/IMG-20260123-WA0009(1).jpg",
-        "/IMG-20260123-WA0013(2).jpg",
-        "/IMG-20260202-WA0004.jpg",
-        "/IMG-20260202-WA0005.jpg",
-        "/IMG-20260202-WA0006.jpg",
-        "/IMG-20260202-WA0008.jpg",
-        "/IMG-20260202-WA0009.jpg",
-        "/IMG-20260202-WA0010.jpg",
-        "/IMG-20260202-WA0012.jpg",
-        "/IMG-20260202-WA0013.jpg",
-        "/IMG-20260202-WA0015.jpg",
-        "/IMG-20260202-WA0017.jpg",
-        "/IMG-20260202-WA0018.jpg",
-        "/IMG-20260202-WA0020.jpg",
-        "/IMG-20260202-WA0023.jpg",
-        "/IMG-20260202-WA0024.jpg",
-        "/IMG-20260202-WA0025.jpg",
-        "/IMG-20260202-WA0026.jpg",
-        "/IMG-20260202-WA0027.jpg",
-        "/IMG-20260202-WA0028.jpg",
-        "/IMG-20260202-WA0029.jpg",
-        "/IMG-20260202-WA0031.jpg",
-        "/IMG-20260210-WA0001(2).jpg",
-        "/IMG-20260211-WA0007(2).jpg",
-        "/IMG-20260220-WA0020(1).jpg",
-        "/IMG-20260303-WA0007(3).jpg",
-        "/IMG-20260303-WA0007(4).jpg",
-        "/IMG-20260303-WA0009(2).jpg",
-        "/IMG-20260303-WA0009(3).jpg",
-        "/IMG-20260321-WA0001(1).jpg",
-        "/IMG-20260321-WA0002(2).jpg",
-        "/IMG-20260321-WA0002(3).jpg",
-        "/IMG-20260321-WA0003(1).jpg",
-        "/IMG-20260401-WA0006(1).jpg",
-        "/IMG-20260502-WA0016(1).jpg",
-        "/IMG-20260502-WA0019.jpg",
-        "/IMG-20260502-WA0020(1).jpg",
-        "/IMG-20260502-WA0021.jpg",
-        "/IMG-20260502-WA0022.jpg",
-        "/IMG-20260502-WA0024.jpg",
-    ];
+    // ✅ FIX: pakai 1.jpg - 50.jpg
+    const images = Array.from({ length: 50 }, (_, i) => `/${i + 1}.jpg`);
 
     const [displayedText, setDisplayedText] = useState("");
     const [showImages, setShowImages] = useState(false);
@@ -68,7 +16,7 @@ const TypewriterStep = ({ onFlowComplete }: { onFlowComplete: () => void }) => {
 
     const audioRef = React.useRef<HTMLAudioElement | null>(null);
 
-    // ✅ FIX UTAMA (hilangin hasStarted + dependency error)
+    // TYPEWRITER
     useEffect(() => {
         if (displayedText.length < text.length) {
             const timer = setTimeout(() => {
@@ -86,10 +34,9 @@ const TypewriterStep = ({ onFlowComplete }: { onFlowComplete: () => void }) => {
         }, 600);
 
         return () => clearTimeout(timer);
+    }, [displayedText]);
 
-    }, [displayedText]); // ❗ FIX: hapus "text"
-
-    // slideshow
+    // SLIDESHOW
     useEffect(() => {
         if (!showImages) return;
 
@@ -103,7 +50,7 @@ const TypewriterStep = ({ onFlowComplete }: { onFlowComplete: () => void }) => {
         return () => clearInterval(interval);
     }, [showImages, images.length]);
 
-    // selesai
+    // FINISH
     useEffect(() => {
         if (index === images.length - 1 && !isDone) {
             const timer = setTimeout(() => {
@@ -130,15 +77,12 @@ const TypewriterStep = ({ onFlowComplete }: { onFlowComplete: () => void }) => {
                 {showImages && (
                     <motion.img
                         key={index}
-                        src={images[index]} // ❗ FIX: hapus encodeURI
+                        src={images[index]} // ✅ bersih, tanpa encodeURI
                         className="absolute inset-0 w-full h-full object-cover"
                         initial={{ opacity: 0, scale: 1.2 }}
                         animate={{ opacity: 1, scale: 1 }}
                         exit={{ opacity: 0, scale: 1.05 }}
                         transition={{ duration: 1.4 }}
-                        onError={(e) => {
-                            (e.target as HTMLImageElement).src = "/fallback.jpg";
-                        }}
                     />
                 )}
             </AnimatePresence>
