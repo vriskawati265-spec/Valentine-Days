@@ -1,3 +1,8 @@
+"use client";
+
+import React, { useEffect, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+
 const TypewriterStep = ({ onComplete }: { onComplete: () => void }) => {
     const text = "happy birthday badasplenger";
 
@@ -77,7 +82,11 @@ const TypewriterStep = ({ onComplete }: { onComplete: () => void }) => {
 
             const timer = setTimeout(() => {
                 setShowImages(true);
-                audioRef.current?.play().catch(() => {});
+
+                audioRef.current?.play().catch(() => {
+                    console.log("autoplay diblok");
+                });
+
             }, 600);
 
             return () => clearTimeout(timer);
@@ -110,7 +119,7 @@ const TypewriterStep = ({ onComplete }: { onComplete: () => void }) => {
             <audio ref={audioRef} src="/tumblrgirl.mp3" loop />
 
             <div className="absolute top-12 w-full text-center z-20">
-                <h1 className="text-xl sm:text-3xl md:text-5xl text-white font-semibold tracking-wide px-4">
+                <h1 className="text-xl sm:text-3xl md:text-5xl text-white font-semibold px-4">
                     {displayedText}
                 </h1>
             </div>
@@ -119,25 +128,12 @@ const TypewriterStep = ({ onComplete }: { onComplete: () => void }) => {
                 {showImages && (
                     <motion.img
                         key={index}
-                        src={encodeURI(images[index])} // ✅ FIX DI SINI
+                        src={encodeURI(images[index])}
                         className="absolute inset-0 w-full h-full object-cover"
                         initial={{ opacity: 0, scale: 1.2 }}
-                        animate={{
-                            opacity: 1,
-                            scale: 1,
-                            x: [0, -10, 10, 0],
-                        }}
-                        exit={{
-                            opacity: 0,
-                            scale: 1.05,
-                        }}
-                        transition={{
-                            duration: 1.4,
-                            ease: "easeInOut"
-                        }}
-                        onError={(e) => {
-                            (e.target as HTMLImageElement).src = "/fallback.jpg";
-                        }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 1.05 }}
+                        transition={{ duration: 1.4 }}
                     />
                 )}
             </AnimatePresence>
@@ -146,3 +142,5 @@ const TypewriterStep = ({ onComplete }: { onComplete: () => void }) => {
         </div>
     );
 };
+
+export default TypewriterStep;
