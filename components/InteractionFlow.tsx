@@ -1,79 +1,94 @@
-"use client";
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Love Heart</title>
 
-import React, { useEffect, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-const TypewriterStep = ({ onFlowComplete }: { onFlowComplete: () => void }) => {
-    const text = "happy birthday badasplenger";
+    body {
+      background: #000;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
 
-    // ✅ FIX: cuma 1 - 9 + pakai .jpeg
-    const images = Array.from({ length: 9 }, (_, i) => `/${i + 1}.jpeg`);
+    canvas {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="c"></canvas>
 
-    const [displayedText, setDisplayedText] = useState("");
-    const [showImages, setShowImages] = useState(false);
-    const [index, setIndex] = useState(0);
+  <script>
+    const canvas = document.getElementById("c");
+    const ctx = canvas.getContext("2d");
 
-    const audioRef = React.useRef<HTMLAudioElement | null>(null);
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
 
-    // TYPEWRITER
-    useEffect(() => {
-        if (displayedText.length < text.length) {
-            const timer = setTimeout(() => {
-                setDisplayedText(text.slice(0, displayedText.length + 1));
-            }, 80);
-            return () => clearTimeout(timer);
-        }
+    let angle = 0;
 
-        const timer = setTimeout(() => {
-            setShowImages(true);
+    const NUM_STEPS = 70;
+    const SCALE = 10;
+    const TEXT = "I love you";
 
-            audioRef.current?.play().catch(() => {
-                console.log("autoplay diblok");
-            });
-        }, 600);
+    function heartX(t) {
+      return 16 * Math.pow(Math.sin(t), 3);
+    }
 
-        return () => clearTimeout(timer);
-    }, [displayedText]);
+    function heartY(t) {
+      return (
+        13 * Math.cos(t) -
+        5 * Math.cos(2 * t) -
+        2 * Math.cos(3 * t) -
+        Math.cos(4 * t)
+      );
+    }
 
-    // SLIDESHOW (LOOP TERUS)
-    useEffect(() => {
-        if (!showImages) return;
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        const interval = setInterval(() => {
-            setIndex((prev) => (prev + 1) % images.length);
-        }, 1300);
+      const cx = canvas.width / 2;
+      const cy = canvas.height / 2;
 
-        return () => clearInterval(interval);
-    }, [showImages, images.length]);
+      ctx.font = "bold 10px Arial";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
 
-    return (
-        <div className="fixed inset-0 bg-black overflow-hidden">
+      for (let i = 0; i < NUM_STEPS; i++) {
+        const t = angle + (Math.PI * 2 * i) / NUM_STEPS;
 
-            <audio ref={audioRef} src="/tumblrgirl.mp3" loop />
+        const x = heartX(t) * SCALE;
+        const y = -heartY(t) * SCALE;
 
-            <div className="absolute top-12 w-full text-center z-20">
-                <h1 className="text-xl sm:text-3xl md:text-5xl text-white font-semibold px-4">
-                    {displayedText}
-                </h1>
-            </div>
+        const hue = (i * 5 + angle * 50) % 360;
 
-            <AnimatePresence mode="wait">
-                {showImages && (
-                    <motion.img
-                        key={index}
-                        src={images[index]}
-                        className="absolute inset-0 w-full h-full object-cover"
-                        initial={{ opacity: 0, scale: 1.2 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 1.05 }}
-                        transition={{ duration: 1.4 }}
-                    />
-                )}
-            </AnimatePresence>
+        ctx.fillStyle = `hsl(${hue}, 100%, 60%)`;
 
-            <div className="absolute inset-0 bg-black/40 z-10" />
-        </div>
-    );
-};
+        ctx.fillText(TEXT, cx + x, cy + y);
+      }
 
-export default TypewriterStep;
+      angle += 0.02;
+
+      requestAnimationFrame(draw);
+    }
+
+    draw();
+
+    window.addEventListener("resize", () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    });
+  </script>
+</body>
+</html>
