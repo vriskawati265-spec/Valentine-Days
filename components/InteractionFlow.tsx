@@ -9,56 +9,73 @@ export default function InteractionFlow() {
     const canvas = canvasRef.current!;
     const ctx = canvas.getContext("2d")!;
 
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    const resize = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    };
+
+    resize();
+    window.addEventListener("resize", resize);
 
     let angle = 0;
-
-    const NUM_STEPS = 70;
-    const SCALE = 10;
-    const TEXT = "I love you";
-
-    function heartX(t: number) {
-      return 16 * Math.pow(Math.sin(t), 3);
-    }
-
-    function heartY(t: number) {
-      return (
-        13 * Math.cos(t) -
-        5 * Math.cos(2 * t) -
-        2 * Math.cos(3 * t) -
-        Math.cos(4 * t)
-      );
-    }
+    let wave = 0;
 
     function draw() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      const cx = canvas.width / 2;
-      const cy = canvas.height / 2;
+      const centerX = canvas.width / 2;
+      const centerY = canvas.height / 2;
+      const scale = 15;
 
-      ctx.font = "bold 10px Arial";
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
+      ctx.font = "bold 10px Arial";
 
-      for (let i = 0; i < NUM_STEPS; i++) {
-        const t = angle + (Math.PI * 2 * i) / NUM_STEPS;
+      for (let i = 0; i < 120; i++) {
+        const t =
+          i * ((2 * Math.PI) / 120) + (angle * Math.PI) / 180;
 
-        const x = heartX(t) * SCALE;
-        const y = -heartY(t) * SCALE;
+        const x = 16 * Math.pow(Math.sin(t), 3);
 
-        const hue = (i * 5 + angle * 50) % 360;
+        const y =
+          13 * Math.cos(t) -
+          5 * Math.cos(2 * t) -
+          2 * Math.cos(3 * t) -
+          Math.cos(4 * t);
 
-        ctx.fillStyle = `hsl(${hue}, 100%, 60%)`;
+        const px = x * scale + centerX;
+        const py = -y * scale + centerY;
 
-        ctx.fillText(TEXT, cx + x, cy + y);
+        const fade = (Math.sin(i * 0.1 + wave) + 1) / 2;
+        const colorValue = Math.floor(255 * fade);
+
+        ctx.fillStyle = `rgb(${colorValue},0,0)`;
+
+        ctx.fillText("I love you", px, py);
       }
 
-      angle += 0.02;
+      angle += 0.5;
+      wave += 0.09;
 
       requestAnimationFrame(draw);
     }
 
     draw();
 
-    window.addEventListener("resize", () => {
+    return () => {
+      window.removeEventListener("resize", resize);
+    };
+  }, []);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      style={{
+        width: "100vw",
+        height: "100vh",
+        background: "black",
+        display: "block",
+      }}
+    />
+  );
+}
